@@ -25,3 +25,7 @@ void _ht_insert(std::unique_ptr<hash_table>& table, const std::string& key, cons
 std::string _ht_search(const std::unique_ptr<hash_table>& table, const std::string& key);
 void print_table(const std::unique_ptr<hash_table>& table);
 
+void _ht_resize_up(std::unique_ptr<hash_table>& table);
+void _ht_resize_down(std::unique_ptr<hash_table>& table);
+void _ht_delete(std::unique_ptr<hash_table>& table, const std::string& key);
+

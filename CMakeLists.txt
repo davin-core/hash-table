@@ -11,4 +11,5 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_executable(main
     src/main.cpp
     src/hash_table.cpp
+    src/prime.cpp
 )

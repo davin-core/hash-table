@@ -3,6 +3,7 @@
 #include<string>
 #include<iostream>
 #include "hash_table.h"
+#include "prime.h"
 
 
 // this function allocate memory for the size of an ht_item 
@@ -53,7 +54,10 @@ static int ht_hash(const std::string &key, int a, int m) {
 
 // this function is used to insert a key-value pair into the hash table
 void _ht_insert(std::unique_ptr<hash_table>& table, const std::string& key, const std::string& value) {
-    int index = ht_hash(key, 31, table->size); 
+    if(table->count >= table->size /0.7) { 
+        _ht_resize_up(table);
+    }
+    int index = ht_hash(key, 31, table->size); // calculate the index for the given key using the hash function
     int start = index; // to keep track of the starting index for linear probing
     while (table-> items[index]!= nullptr) { // while there is a collision
         if (table->items[index]->key == key) { // if the key already exists, update the value
@@ -86,6 +90,7 @@ std::string _ht_search(const std::unique_ptr<hash_table>& table, const std::stri
     return ""; // if the key is not found, return an empty string
 }
 
+// display formatting 
 void print_table(const std::unique_ptr<hash_table>& table) {
     std::cout << "\n--- Hash Table (size=" << table->size << ", count=" << table->count << ") ---\n";
     for (int i = 0; i < table->size; ++i) {
@@ -97,4 +102,48 @@ void print_table(const std::unique_ptr<hash_table>& table) {
         }
     }
     std::cout << "---------------------------------------------\n";
+}
+
+static void _ht_resize_helper(std::unique_ptr<hash_table>& table, int new_size){
+    auto new_table = ht_new(new_size);
+
+    for(int i =0; i < table->size; ++i){
+        if(table->items[i] != nullptr){
+            _ht_insert(new_table, table->items[i]->key, table->items[i]->value); // rehashing the existing items into the new table
+        }
+    }
+    table = std::move(new_table); // replace the old table with the new resized table
+}
+
+void _ht_resize_up(std::unique_ptr<hash_table>& table){
+    int new_size = next_prime(table->size * 2); // find the next prime number after doubling the current size
+    _ht_resize_helper(table, new_size);
+    std::cout << "Resized up to " << new_size << "\n";
+}
+
+void _ht_resize_down(std::unique_ptr<hash_table>& table){
+    int new_size = next_prime(table->size / 2); // find the next prime number after halving the current size
+    if (new_size < 5) new_size = 5; // set a minimum size for the hash table to prevent it from becoming too small
+    _ht_resize_helper(table, new_size);
+    std::cout << "Resized down to " << new_size << "\n";
+}
+
+void _ht_delete(std::unique_ptr<hash_table>& table, const std::string& key){
+    int index = ht_hash(key, 31, table->size); 
+    int start = index; // to keep track of the starting index for linear probing
+    while (table->items[index] != nullptr) { // while there is a collision
+        if (table->items[index]->key == key) { // if the key is found, delete the item
+            table->items[index].reset(); // reset the unique_ptr to delete the item
+            table->count--; // decrease the count of items in the hash table
+            if(table->count < table->size * 0.2 && table->size > 5){ // if the load factor is less than or equal to 0.25, resize down the hash table
+                _ht_resize_down(table);
+            }
+            return;
+        }
+        index = (index + 1) % table->size; // linear probing to find the next slot
+        
+        if(index == start){
+            break; // we have looped through the entire table and found no available slot, so we break out of the loop
+        }
+    }
 }
