@@ -128,6 +128,7 @@ void _ht_resize_down(std::unique_ptr<hash_table>& table){
     std::cout << "Resized down to " << new_size << "\n";
 }
 
+// re-added because we wantto delete items from the hash table, and we need to check the load factor after deletion to decide whether to resize down the hash table or not.
 void _ht_delete(std::unique_ptr<hash_table>& table, const std::string& key){
     int index = ht_hash(key, 31, table->size); 
     int start = index; // to keep track of the starting index for linear probing

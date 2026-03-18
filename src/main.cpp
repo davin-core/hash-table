@@ -2,8 +2,6 @@
 #include <iostream>
 int main(){
     auto table = ht_new(10);
-
-    // ...existing code...
     while (true) {
         std::cout << "\nChoose an action:\n"
                 << "1) Insert/Update key-value\n"
