@@ -21,5 +21,7 @@ std::unique_ptr<ht_item> ht_new_item(const std::string& key, const std::string& 
 std::unique_ptr<hash_table> ht_new(int size);
 // we don't need this because we use unique_ptr to manage memory, it will automatically delete the hash_table when it goes out of scope
 //void ht_del_hash_table(std::unique_ptr<hash_table>& table);
-
+void _ht_insert(std::unique_ptr<hash_table>& table, const std::string& key, const std::string& value);
+std::string _ht_search(const std::unique_ptr<hash_table>& table, const std::string& key);
+void print_table(const std::unique_ptr<hash_table>& table);
 

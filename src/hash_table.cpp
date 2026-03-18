@@ -1,5 +1,7 @@
 #include<string>
 #include<memory>
+#include<string>
+#include<iostream>
 #include "hash_table.h"
 
 
@@ -35,3 +37,64 @@ std::unique_ptr<hash_table> ht_new(int size){
 //    }
 //    table.reset(); // reset the unique_ptr to delete the hash_table
 //}
+
+// hashing function to calculate the index for a given key
+// algoirthm: 
+// take string, a number between 0 and m. Our desired bucket array length
+// return an even distribution of the hash values for the keys. 
+// If not evenly distributed, we will have more collisions and the performance of the hash table will degrade. 
+static int ht_hash(const std::string &key, int a, int m) {
+    long hash = 0;
+    for(char c : key) {
+        hash = (hash * a + c) % m;
+    }
+    return static_cast<int>(hash);
+}
+
+// this function is used to insert a key-value pair into the hash table
+void _ht_insert(std::unique_ptr<hash_table>& table, const std::string& key, const std::string& value) {
+    int index = ht_hash(key, 31, table->size); 
+    int start = index; // to keep track of the starting index for linear probing
+    while (table-> items[index]!= nullptr) { // while there is a collision
+        if (table->items[index]->key == key) { // if the key already exists, update the value
+            table->items[index]->value = value;
+            return;
+        }
+        index = (index + 1) % table->size; // linear probing to find the next available slot
+        
+        if(index == start){
+            return; // we have looped through the entire table and found no available slot, so we return without inserting
+        }
+    }
+    table->items[index] = ht_new_item(key, value); // insert the new item into the hash table
+    table->count++;  
+}
+
+std::string _ht_search(const std::unique_ptr<hash_table>& table, const std::string& key){
+    int index = ht_hash(key, 31, table->size); 
+    int start = index; // to keep track of the starting index for linear probing
+    while (table->items[index] != nullptr) { // while there is a collision
+        if (table->items[index]->key == key) { // if the key is found, return the value
+            return table->items[index]->value;
+        }
+        index = (index + 1) % table->size; // linear probing to find the next slot
+        
+        if(index == start){
+            break; // we have looped through the entire table and found no available slot, so we break out of the loop
+        }
+    }
+    return ""; // if the key is not found, return an empty string
+}
+
+void print_table(const std::unique_ptr<hash_table>& table) {
+    std::cout << "\n--- Hash Table (size=" << table->size << ", count=" << table->count << ") ---\n";
+    for (int i = 0; i < table->size; ++i) {
+        if (table->items[i] != nullptr) {
+            std::cout << "[" << i << "] " << table->items[i]->key
+                      << " => " << table->items[i]->value << "\n";
+        } else {
+            std::cout << "[" << i << "] (empty)\n";
+        }
+    }
+    std::cout << "---------------------------------------------\n";
+}
